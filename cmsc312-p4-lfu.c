@@ -116,6 +116,7 @@ int replace_lfu( int *pid, frame_t **victim )
      }
      iterator = iterator->next;
   }
+  printf("We have looped.\n");
   
   /* return info on victim */
   *victim = &physical_mem[iterator->ptentry->frame];
