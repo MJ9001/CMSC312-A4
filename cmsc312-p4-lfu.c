@@ -138,7 +138,7 @@ int replace_lfu( int *pid, frame_t **victim )
 
 int update_lfu( int pid, frame_t *f )
 {
-  std::cout << "Do we get here.\n";
+  printf("Do we get here.\n");
   /* make new list entry */
   lfu_entry_t *list_entry = ( lfu_entry_t *)malloc(sizeof(lfu_entry_t));
   list_entry->ptentry = &processes[pid].pagetable[f->page];
