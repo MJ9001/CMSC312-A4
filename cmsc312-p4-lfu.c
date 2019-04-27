@@ -59,7 +59,6 @@ typedef struct lfu_entry{
 
 typedef struct lfu{
   lfu_entry_t *first;
-  int count;
 } lfu_t;
 
 lfu_t *page_list;
@@ -187,6 +186,8 @@ int update_lfu( int pid, frame_t *f )
     {
       list_entry->next = toBeReplaced->next;
       list_entry->prev = toBeReplaced->prev;
+      if(lfu->first == toBeReplaced)
+         lfu->first = list_entry;
       if(toBeReplaced->next != NULL)
          toBeReplaced->next->prev = list_entry;
       if(toBeReplaced->prev != NULL)
