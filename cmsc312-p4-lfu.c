@@ -95,6 +95,8 @@ int init_lfu( FILE *fp )
 
 int replace_lfu( int *pid, frame_t **victim )
 {
+    
+  printf("And then we got here.\n");
   lfu_entry_t *first = page_list->first;
   lfu_entry_t *iterator = page_list->first;
   lfu_entry_t *toBeReplaced = first;
