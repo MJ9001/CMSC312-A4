@@ -94,8 +94,47 @@ int init_mfu( FILE *fp )
 
 int replace_mfu( int *pid, frame_t **victim )
 {
-  /* Task 3 */
-
+    
+  printf("And then we got here.\n");
+  mfu_entry_t *first = page_list->first;
+  mfu_entry_t *iterator = page_list->first;
+  mfu_entry_t *toBeReplaced = first;
+  int highest_count = 0;
+  printf("Are we here?\n");
+  if(first == NULL)
+  {
+    printf("FIRST WAS NULL, OMG.\n");
+  }
+  while(iterator != NULL)
+  {
+     printf("Let us loop!\n");
+     if(iterator->ptentry->ct > lowest_count)
+     {
+       highest_count = iterator->ptentry->ct;
+       toBeReplaced = iterator;
+     }
+     iterator = iterator->next;
+  }
+  printf("We have looped.\n");
+  
+  /* return info on victim */
+  *victim = &physical_mem[toBeReplaced->ptentry->frame];
+  *pid = toBeReplaced->pid;
+  printf("Return info set.\n");
+  
+  //list_entry->next = toBeReplaced->next;
+  //list_entry->prev = toBeReplaced->prev;
+  if(first == toBeReplaced)
+      page_list->first = first->next;
+  else{
+    if(toBeReplaced->next != NULL)
+       toBeReplaced->next->prev = toBeReplaced->prev;
+    if(toBeReplaced->prev != NULL)
+       toBeReplaced->prev->next = toBeReplaced->next;
+    printf("Let's free up some space.\n");
+    free(toBeReplaced);
+  }
+  printf("And finished.\n");
   return 0;
 }
 
@@ -114,7 +153,55 @@ int replace_mfu( int *pid, frame_t **victim )
 
 int update_mfu( int pid, frame_t *f )
 {
-  /* Task 3 */
+  printf("Do we get here.\n");
+  /* make new list entry */
+  mfu_entry_t *list_entry = ( mfu_entry_t *)malloc(sizeof(mfu_entry_t));
+  list_entry->ptentry = &processes[pid].pagetable[f->page];
+  list_entry->pid = pid;
+  list_entry->next = NULL;
   
+  /* put it at the end of the list (beginning if null) */
+  if ( page_list->first == NULL ) {
+    page_list->first = list_entry;
+  }
+  /* or really at end */
+  else {
+    mfu_entry_t *first = page_list->first;
+    mfu_entry_t *iterator = page_list->first;
+    int counter = 0;
+    int highest_count = 0;
+    mfu_entry_t *toBeReplaced = first;
+  
+    while(iterator != NULL)
+    {
+       if(iterator->ptentry->ct > highest_count)
+       {
+         highest_count = iterator->ptentry->ct;
+         toBeReplaced = iterator;
+       }
+       iterator = iterator->next;
+       counter++;
+    }
+    if(counter >= 4)
+    {
+      list_entry->next = toBeReplaced->next;
+      list_entry->prev = toBeReplaced->prev;
+      if(page_list->first == toBeReplaced)
+         page_list->first = list_entry;
+      if(toBeReplaced->next != NULL)
+         toBeReplaced->next->prev = list_entry;
+      if(toBeReplaced->prev != NULL)
+         toBeReplaced->prev->next = list_entry;
+      free(toBeReplaced);
+    }else
+    {
+      iterator = first;
+      while(iterator->next != NULL)
+        iterator = iterator->next;
+      iterator->next = NULL;
+      iterator->prev = list_entry;
+      list_entry->next = iterator;
+    }
+  }
   return 0;
 }
