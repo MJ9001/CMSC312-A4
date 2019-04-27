@@ -108,7 +108,7 @@ int replace_mfu( int *pid, frame_t **victim )
   while(iterator != NULL)
   {
      printf("Let us loop!\n");
-     if(iterator->ptentry->ct > lowest_count)
+     if(iterator->ptentry->ct > highest_count)
      {
        highest_count = iterator->ptentry->ct;
        toBeReplaced = iterator;
