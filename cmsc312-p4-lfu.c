@@ -76,7 +76,6 @@ int init_lfu( FILE *fp )
 {
   page_list = (lfu_t *)malloc(sizeof(lfu_t));
   page_list->first = NULL;
-  page_list->count = 0;
   return 0;
 }
 
@@ -186,8 +185,8 @@ int update_lfu( int pid, frame_t *f )
     {
       list_entry->next = toBeReplaced->next;
       list_entry->prev = toBeReplaced->prev;
-      if(lfu->first == toBeReplaced)
-         lfu->first = list_entry;
+      if(page_list->first == toBeReplaced)
+         page_list->first = list_entry;
       if(toBeReplaced->next != NULL)
          toBeReplaced->next->prev = list_entry;
       if(toBeReplaced->prev != NULL)
