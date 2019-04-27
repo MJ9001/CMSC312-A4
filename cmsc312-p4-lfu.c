@@ -101,6 +101,7 @@ int replace_lfu( int *pid, frame_t **victim )
   lfu_entry_t *iterator = page_list->first;
   lfu_entry_t *toBeReplaced = first;
   int lowest_count = 2147483647;
+  printf("Are we here?\n");
   if(first == NULL)
   {
     printf("FIRST WAS NULL, OMG.\n");
