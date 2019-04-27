@@ -483,7 +483,7 @@ int tlb_update_pageref( int frame, int page, int op )
 
 ***********************************************************************/
 
-int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )
+int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//change
 {
 
     int opa;
@@ -579,11 +579,20 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 ***********************************************************************/
 
-int pt_invalidate_mapping( int pid, int page )
+int pt_invalidate_mapping( int pid, int page )//change
 {
-  /* Task #3 */
+    ptentry_t *ptentry; // [rsp+18h] [rbp-8h]
 
-  return 0;
+    if ( processes[pid].pid != pid )
+      __assert_fail("processes[pid].pid == pid", "project1-demo.c", 0x24Fu, "pt_invalidate_mapping");
+    ptentry = &processes[pid].pagetable[page];
+    if ( ptentry->bits & 4 )
+      pt_write_frame(&physical_mem[ptentry->frame]);
+    else
+      ++invalidates;
+    ptentry->frame = 0;
+    ptentry->bits &= 0x38u;
+    return 0;
 }
 
 
@@ -619,11 +628,12 @@ int pt_write_frame( frame_t *f )
 
 int pt_alloc_frame( int pid, frame_t *f, ptentry_t *ptentry, int op, int mech )
 {
-  /* Task #3 */
-
-  /* initialize page frame */
-
-  /* update the replacement info */
+  f->allocated = 1;
+  f->page = ptentry->number;
+  f->op = op;
+  ptentry->frame = f->number;
+  ptentry->bits |= 1u;
+  ptentry->op = op;
   pt_update_replacement[mech]( pid, f );
 
   return 0;
