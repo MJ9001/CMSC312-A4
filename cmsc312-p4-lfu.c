@@ -100,13 +100,12 @@ int replace_lfu( int *pid, frame_t **victim )
   lfu_entry_t *toBeReplaced = first;
   while(iterator != NULL)
   {
-     if(iterator->ptentry.ct < lowest_count)
+     if(iterator->ptentry->ct < lowest_count)
      {
-       lowest_count = iterator->ptentry.ct;
+       lowest_count = iterator->ptentry->ct;
        toBeReplaced = iterator;
      }
      iterator = iterator->next;
-     counter++;
   }
   
   /* return info on victim */
@@ -114,11 +113,11 @@ int replace_lfu( int *pid, frame_t **victim )
   *pid = toBeReplaced->pid;
   
   list_entry->next = toBeReplaced->next;
-  list_entry->previous = toBeReplaced->previous;
+  list_entry->prev = toBeReplaced->prev;
   if(*toBeReplaced->next != NULL)
-    *toBeReplaced->next->previous = *toBeReplaced->previous;
-  if(*toBeReplaced->previous != NULL)
-    *toBeReplaced->previous->next = *toBeReplaced->next;
+    *toBeReplaced->next->prev = *toBeReplaced->prev;
+  if(*toBeReplaced->prev != NULL)
+    *toBeReplaced->prev->next = *toBeReplaced->next;
   free(toBeReplaced);
 }
 
@@ -157,7 +156,7 @@ int update_lfu( int pid, frame_t *f )
   
     while(iterator != NULL)
     {
-       if(iterator->ptentry.ct < lowest_count)
+       if(iterator->ptentry->ct < lowest_count)
        {
          lowest_count = iterator->ptentry.ct;
          toBeReplaced = iterator;
@@ -168,11 +167,11 @@ int update_lfu( int pid, frame_t *f )
     if(counter >= 4)
     {
       list_entry->next = toBeReplaced->next;
-      list_entry->previous = toBeReplaced->previous;
+      list_entry->prev = toBeReplaced->prev;
       if(*toBeReplaced->next != NULL)
-        *toBeReplaced->next->previous = list_entry;
-      if(*toBeReplaced->previous != NULL)
-        *toBeReplaced->previous->next = list_entry;
+        *toBeReplaced->next->prev = list_entry;
+      if(*toBeReplaced->prev != NULL)
+        *toBeReplaced->prev->next = list_entry;
       free(toBeReplaced);
     }else
     {
@@ -180,7 +179,7 @@ int update_lfu( int pid, frame_t *f )
       while(iterator->next != NULL)
         iterator = iterator->next;
       iterator->next = list_entry;
-      list_entry->previous = iterator;
+      list_entry->prev = iterator;
     }
   }
   return 0;
