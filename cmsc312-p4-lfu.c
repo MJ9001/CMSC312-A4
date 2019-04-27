@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* second chance list */
 
-typedef struct lfu_entry{  
+/*typedef struct lfu_entry{  
   int pid;
   ptentry_t *ptentry;
   struct lfu_entry *next;
@@ -62,7 +62,22 @@ typedef struct lfu{
   lfu_entry_t *first;
 } lfu_t;
 
-lfu_t *page_list;
+lfu_t *page_list;*/
+
+
+typedef struct fifo_entry {  
+  int pid;
+  frame_t *frame;
+  struct fifo_entry *next;
+} fifo_entry_t;
+
+typedef struct fifo {
+  fifo_entry_t *first;
+  fifo_entry_t *last;
+} fifo_t;
+
+fifo_t *frame_list;
+
 
 /**********************************************************************
 
@@ -94,7 +109,15 @@ int init_lfu( FILE *fp )
 
 int replace_lfu( int *pid, frame_t **victim )
 {
-  /* Task 3 */
+  fifo_entry_t *first = frame_list->first;
+
+  /* return info on victim */
+  *victim = first->frame;
+  *pid = first->pid;
+
+  /* remove from list */
+  frame_list->first = first->next;
+  free( first );
 
   return 0;
 }
@@ -114,7 +137,22 @@ int replace_lfu( int *pid, frame_t **victim )
 
 int update_lfu( int pid, frame_t *f )
 {
-  /* Task 3 */
-  
+  /* make new list entry */
+  fifo_entry_t *list_entry = ( fifo_entry_t *)malloc(sizeof(fifo_entry_t));
+  list_entry->frame = f;
+  list_entry->pid = pid;
+  list_entry->next = NULL;
+
+  /* put it at the end of the list (beginning if null) */
+  if ( frame_list->first == NULL ) {
+    frame_list->first = list_entry;
+    frame_list->last = list_entry;
+  }
+  /* or really at end */
+  else {
+    frame_list->last->next = list_entry;
+    frame_list->last = list_entry;
+  }
+
   return 0;
 }
