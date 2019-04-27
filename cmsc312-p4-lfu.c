@@ -113,13 +113,14 @@ int replace_lfu( int *pid, frame_t **victim )
   *victim = &physical_mem[iterator->ptentry->frame];
   *pid = toBeReplaced->pid;
   
-  list_entry->next = toBeReplaced->next;
-  list_entry->prev = toBeReplaced->prev;
+  //list_entry->next = toBeReplaced->next;
+  //list_entry->prev = toBeReplaced->prev;
   if(*toBeReplaced->next != NULL)
     *toBeReplaced->next->prev = *toBeReplaced->prev;
   if(*toBeReplaced->prev != NULL)
     *toBeReplaced->prev->next = *toBeReplaced->next;
   free(toBeReplaced);
+  return 0;
 }
 
 
