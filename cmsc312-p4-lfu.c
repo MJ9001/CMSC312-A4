@@ -98,6 +98,7 @@ int replace_lfu( int *pid, frame_t **victim )
   lfu_entry_t *first = page_list->first;
   lfu_entry_t *iterator = page_list->first;
   lfu_entry_t *toBeReplaced = first;
+    int lowest_count = 2147483647;
   while(iterator != NULL)
   {
      if(iterator->ptentry->ct < lowest_count)
@@ -109,7 +110,7 @@ int replace_lfu( int *pid, frame_t **victim )
   }
   
   /* return info on victim */
-  *victim = toBeReplaced->frame;
+  *victim = &pyhsical_mem[iterator->ptentry->frame]
   *pid = toBeReplaced->pid;
   
   list_entry->next = toBeReplaced->next;
