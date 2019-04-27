@@ -110,7 +110,7 @@ int replace_lfu( int *pid, frame_t **victim )
   }
   
   /* return info on victim */
-  *victim = &pyhsical_mem[iterator->ptentry->frame];
+  *victim = &physical_mem[iterator->ptentry->frame];
   *pid = toBeReplaced->pid;
   
   list_entry->next = toBeReplaced->next;
