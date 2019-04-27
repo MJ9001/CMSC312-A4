@@ -121,13 +121,14 @@ int replace_lfu( int *pid, frame_t **victim )
   /* return info on victim */
   *victim = &physical_mem[toBeReplaced->ptentry->frame];
   *pid = toBeReplaced->pid;
+  printf("Return info set.\n");
   
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
   if(toBeReplaced->next != NULL)
-    *toBeReplaced->next->prev = *toBeReplaced->prev;
+     toBeReplaced->next->prev = toBeReplaced->prev;
   if(toBeReplaced->prev != NULL)
-    *toBeReplaced->prev->next = *toBeReplaced->next;
+     toBeReplaced->prev->next = toBeReplaced->next;
   printf("Let's free up some space.\n");
   free(toBeReplaced);
   
