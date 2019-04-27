@@ -115,9 +115,9 @@ int replace_lfu( int *pid, frame_t **victim )
   
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
-  if(*toBeReplaced->next != NULL)
+  if(toBeReplaced->next != NULL)
     *toBeReplaced->next->prev = *toBeReplaced->prev;
-  if(*toBeReplaced->prev != NULL)
+  if(toBeReplaced->prev != NULL)
     *toBeReplaced->prev->next = *toBeReplaced->next;
   free(toBeReplaced);
   return 0;
@@ -140,7 +140,7 @@ int update_lfu( int pid, frame_t *f )
 {
   /* make new list entry */
   lfu_entry_t *list_entry = ( lfu_entry_t *)malloc(sizeof(lfu_entry_t));
-  list_entry->ptentry = &processes[pid].pagetable[f->table];
+  list_entry->ptentry = &processes[pid].pagetable[f->page];
   list_entry->pid = pid;
   list_entry->next = NULL;
   
