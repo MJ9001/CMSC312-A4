@@ -191,6 +191,8 @@ int main( int argc, char **argv )
 
 int write_results( FILE *out )
 {
+  int effective_memory_access_time = tlb_hit_ratio*(TLB_SEARCH_TIME+MEMORY_ACCESS_TIME)+tlb_hit_ratio*(TLB_SEARCH_TIME+2*MEMORY_ACCESS_TIME);
+  int memory_accesses_time = (1-pf_ratio)*effective_memory_access_time/1000 + pf_ratio*(PF_OVERHEAD + SWAP_IN_OVERHEAD + RESTART_OVERHEAD + swap_out_ratio*SWAP_OUT_OVERHEAD);
   float tlb_hit_ratio, tlb_miss_ratio, pf_ratio, swap_out_ratio;
 
   fprintf( out, "++++++++++++++++++++ Effective Memory-Access Time ++++++++++++++++++\n" );
@@ -201,8 +203,7 @@ int write_results( FILE *out )
   fprintf( out, "memory accesses: %d; total memory accesses %d (less page faults)\n", memory_accesses, total_accesses-pfs ); 
   fprintf( out, "TLB hit rate = %f\n", tlb_hit_ratio ); 
   fprintf( out, "Effective memory-access time = %fns\n", 
-	   /* Task #3: ADD THIS COMPUTATION */
-	   0.0);
+        effective_memory_access_time);
 
   fprintf( out, "++++++++++++++++++++ Effective Access Time ++++++++++++++++++\n" );
   fprintf( out, "Assuming,\n %dms average page-fault service time (w/o swap out), a %dms average swap out time, and %dns memory access time\n", 
@@ -212,9 +213,7 @@ int write_results( FILE *out )
   pf_ratio = ( (float)pfs / (float)total_accesses );
   swap_out_ratio = ( (float)swaps / (float)pfs );
   fprintf( out, "Page fault ratio = %f\n", pf_ratio ); 
-  fprintf( out, "Effective access time = %fms\n", 
-	   /* Task #3: ADD THIS COMPUTATION */
-	   0.0);
+  fprintf( out, "Effective access time = %fms\n", memory_accesses_time);
 
   return 0;
 }
@@ -490,8 +489,6 @@ int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op
     int page;
     ptentry_t *ptentry;
     int frame;
-      
-    opa = op;
     page = vaddr >> 12;
     ptentry = &current_pt[vaddr >> 12];
     if ( !ptentry )
@@ -502,7 +499,7 @@ int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op
     {
       *paddr = (vaddr & 0xFFF) + (frame << 12);
       hw_update_pageref(&current_pt[page], op);
-      tlb_update_pageref(frame, page, opa);
+      tlb_update_pageref(frame, page, op);
       ++current_pt[page].ct;
       printf("pt_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
       ++memory_accesses;
