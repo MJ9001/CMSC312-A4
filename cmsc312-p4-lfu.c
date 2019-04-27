@@ -160,7 +160,7 @@ int update_lfu( int pid, frame_t *f )
     {
        if(iterator->ptentry->ct < lowest_count)
        {
-         lowest_count = iterator->ptentry.ct;
+         lowest_count = iterator->ptentry->ct;
          toBeReplaced = iterator;
        }
        iterator = iterator->next;
@@ -170,10 +170,10 @@ int update_lfu( int pid, frame_t *f )
     {
       list_entry->next = toBeReplaced->next;
       list_entry->prev = toBeReplaced->prev;
-      if(*toBeReplaced->next != NULL)
-        *toBeReplaced->next->prev = list_entry;
-      if(*toBeReplaced->prev != NULL)
-        *toBeReplaced->prev->next = list_entry;
+      if(toBeReplaced->next != NULL)
+         toBeReplaced->next->prev = list_entry;
+      if(toBeReplaced->prev != NULL)
+         toBeReplaced->prev->next = list_entry;
       free(toBeReplaced);
     }else
     {
