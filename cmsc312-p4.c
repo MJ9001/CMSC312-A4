@@ -191,8 +191,6 @@ int main( int argc, char **argv )
 
 int write_results( FILE *out )
 {
-  int effective_memory_access_time = tlb_hit_ratio*(TLB_SEARCH_TIME+MEMORY_ACCESS_TIME)+tlb_hit_ratio*(TLB_SEARCH_TIME+2*MEMORY_ACCESS_TIME);
-  int memory_accesses_time = (1-pf_ratio)*effective_memory_access_time/1000 + pf_ratio*(PF_OVERHEAD + SWAP_IN_OVERHEAD + RESTART_OVERHEAD + swap_out_ratio*SWAP_OUT_OVERHEAD);
   float tlb_hit_ratio, tlb_miss_ratio, pf_ratio, swap_out_ratio;
 
   fprintf( out, "++++++++++++++++++++ Effective Memory-Access Time ++++++++++++++++++\n" );
@@ -200,6 +198,7 @@ int write_results( FILE *out )
 	   TLB_SEARCH_TIME, MEMORY_ACCESS_TIME );
   tlb_miss_ratio = ( (float) memory_accesses / (float) (total_accesses-pfs) );
   tlb_hit_ratio = 1.0 - tlb_miss_ratio;
+  int effective_memory_access_time = tlb_hit_ratio*(TLB_SEARCH_TIME+MEMORY_ACCESS_TIME)+tlb_hit_ratio*(TLB_SEARCH_TIME+2*MEMORY_ACCESS_TIME);
   fprintf( out, "memory accesses: %d; total memory accesses %d (less page faults)\n", memory_accesses, total_accesses-pfs ); 
   fprintf( out, "TLB hit rate = %f\n", tlb_hit_ratio ); 
   fprintf( out, "Effective memory-access time = %fns\n", 
@@ -212,6 +211,7 @@ int write_results( FILE *out )
 	   swaps, invalidates, pfs ); 
   pf_ratio = ( (float)pfs / (float)total_accesses );
   swap_out_ratio = ( (float)swaps / (float)pfs );
+  int memory_accesses_time = (1-pf_ratio)*effective_memory_access_time/1000 + pf_ratio*(PF_OVERHEAD + SWAP_IN_OVERHEAD + RESTART_OVERHEAD + swap_out_ratio*SWAP_OUT_OVERHEAD);
   fprintf( out, "Page fault ratio = %f\n", pf_ratio ); 
   fprintf( out, "Effective access time = %fms\n", memory_accesses_time);
 
