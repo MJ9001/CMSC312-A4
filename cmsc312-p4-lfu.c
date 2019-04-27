@@ -108,6 +108,7 @@ int replace_lfu( int *pid, frame_t **victim )
   }
   while(iterator != NULL)
   {
+      printf("Let us loop!\n");
      if(iterator->ptentry->ct < lowest_count)
      {
        lowest_count = iterator->ptentry->ct;
