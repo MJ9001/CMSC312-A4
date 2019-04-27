@@ -108,7 +108,7 @@ int replace_lfu( int *pid, frame_t **victim )
   }
   while(iterator != NULL)
   {
-     //printf("Let us loop!\n");
+     printf("Let us loop!\n");
      if(iterator->ptentry->ct < lowest_count)
      {
        lowest_count = iterator->ptentry->ct;
@@ -125,13 +125,16 @@ int replace_lfu( int *pid, frame_t **victim )
   
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
-  if(toBeReplaced->next != NULL)
-     toBeReplaced->next->prev = toBeReplaced->prev;
-  if(toBeReplaced->prev != NULL)
-     toBeReplaced->prev->next = toBeReplaced->next;
-  printf("Let's free up some space.\n");
-  free(toBeReplaced);
-  
+  if(first == toBeReplaced)
+      page_list->first = first->next;
+  else{
+    if(toBeReplaced->next != NULL)
+       toBeReplaced->next->prev = toBeReplaced->prev;
+    if(toBeReplaced->prev != NULL)
+       toBeReplaced->prev->next = toBeReplaced->next;
+    printf("Let's free up some space.\n");
+    free(toBeReplaced);
+  }
   printf("And finished.\n");
   return 0;
 }
