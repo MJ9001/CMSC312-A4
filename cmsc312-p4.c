@@ -407,7 +407,7 @@ int tlb_flush( void )
    segments in the ELF binary (read-only, read-write, execute-only).  Assume that this is 
    already done */
 
-int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )
+int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change
 {
     unsigned int page;
     int i;
@@ -419,7 +419,7 @@ int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )
       {
         *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
         hw_update_pageref(&current_pt[page], op);
-        ++current_pt[page].ct;
+        current_pt[page].ct++;
         printf("tlb_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
         return 1;
       }

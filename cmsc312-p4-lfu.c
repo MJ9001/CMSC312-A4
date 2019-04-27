@@ -59,10 +59,29 @@ typedef struct lfu_entry{
 
 typedef struct lfu{
   lfu_entry_t *first;
-  int counted;
+  int count;
 } lfu_t;
 
 lfu_t *page_list;
+
+
+
+lfu_entry getSmallestEntry()
+{
+  int lowest_count = INT_MAX;
+  lfu_entry *first = page_list->first;
+  lfu_entry *toBeReplaced = first;
+  while(first != NULL)
+  {
+     if(first->ptentry.ct < lowest_count)
+     {
+       lowest_count = first->ptentry.ct;
+       toBeReplaced = first;
+     }
+     first = first->next;
+  }
+}
+
 
 
 /**********************************************************************
@@ -78,7 +97,7 @@ int init_lfu( FILE *fp )
 {
   page_list = (lfu_t *)malloc(sizeof(lfu_t));
   page_list->first = NULL;
-  page_list->counted = 0;
+  page_list->count = 0;
   return 0;
 }
 
@@ -97,28 +116,30 @@ int init_lfu( FILE *fp )
 int replace_lfu( int *pid, frame_t **victim )
 {
   lfu_entry *first = page_list->first;
-  
-  int lowest_count = INT_MAX;
+  lfu_entry *iterator = page_list->first;
   lfu_entry *toBeReplaced = first;
-  while(first != NULL)
+  while(iterator != NULL)
   {
-     if(first->ptentry.ct < lowest_count)
+     if(iterator->ptentry.ct < lowest_count)
      {
-       lowest_count = first->ptentry.ct;
-       toBeReplaced = first;
+       lowest_count = iterator->ptentry.ct;
+       toBeReplaced = iterator;
      }
-     first = first->next;
+     iterator = iterator->next;
+     counter++;
   }
   
   /* return info on victim */
   *victim = toBeReplaced->frame;
   *pid = toBeReplaced->pid;
-
-  /* remove from list */
-  frame_list->first = first->next;
-  free( first );
-
-  return 0;
+  
+  list_entry->next = toBeReplaced->next;
+  list_entry->previous = toBeReplaced->previous;
+  if(*toBeReplaced->next != NULL)
+    *toBeReplaced->next->previous = *toBeReplaced->previous;
+  if(*toBeReplaced->previous != NULL)
+    *toBeReplaced->previous->next = *toBeReplaced->next;
+  free(toBeReplaced);
 }
 
 
@@ -138,20 +159,49 @@ int update_lfu( int pid, frame_t *f )
 {
   /* make new list entry */
   lfu_entry *list_entry = ( lfu_entry *)malloc(sizeof(lfu_entry));
-  list_entry->frame = f;
+  list_entry->ptentry = &processes[pid].pagetable[f->table];
   list_entry->pid = pid;
   list_entry->next = NULL;
-
+  
   /* put it at the end of the list (beginning if null) */
-  if ( frame_list->first == NULL ) {
-    frame_list->first = list_entry;
-    frame_list->last = list_entry;
+  if ( page_list->first == NULL ) {
+    page_list->first = list_entry;
   }
   /* or really at end */
   else {
-    frame_list->last->next = list_entry;
-    frame_list->last = list_entry;
+    lfu_entry *first = page_list->first;
+    lfu_entry *iterator = page_list->first;
+    int counter = 0;
+    int lowest_count = INT_MAX;
+    lfu_entry *toBeReplaced = first;
+  
+    while(iterator != NULL)
+    {
+       if(iterator->ptentry.ct < lowest_count)
+       {
+         lowest_count = iterator->ptentry.ct;
+         toBeReplaced = iterator;
+       }
+       iterator = iterator->next;
+       counter++;
+    }
+    if(counter >= 4)
+    {
+      list_entry->next = toBeReplaced->next;
+      list_entry->previous = toBeReplaced->previous;
+      if(*toBeReplaced->next != NULL)
+        *toBeReplaced->next->previous = list_entry;
+      if(*toBeReplaced->previous != NULL)
+        *toBeReplaced->previous->next = list_entry;
+      free(toBeReplaced);
+    }else
+    {
+      iterator = first;
+      while(iterator->next != NULL)
+        iterator = iterator->next;
+      iterator->next = list_entry;
+      list_entry->previous = iterator;
+    }
   }
-
   return 0;
 }
