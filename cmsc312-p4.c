@@ -473,8 +473,27 @@ int tlb_update_pageref( int frame, int page, int op )
 int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )
 {
 
-  /* Task #2 */
-
+    int opa;
+    int page;
+    ptentry_t *ptentry;
+    int frame;
+      
+    opa = op;
+    page = vaddr >> 12;
+    ptentry = &current_pt[vaddr >> 12];
+    if ( !ptentry )
+      __assert_fail("ptentry != ((void *)0)", "project1-demo.c", 0x1EFu, "pt_resolve_addr");
+    frame = ptentry->frame;
+    *valid = ptentry->bits & 1;
+    if ( *valid )
+    {
+      *paddr = (vaddr & 0xFFF) + (frame << 12);
+      hw_update_pageref(&current_pt[page], op);
+      tlb_update_pageref(frame, page, opa);
+      ++current_pt[page].ct;
+      printf("pt_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
+      ++memory_accesses;
+    }
   return 0;
 }
 
