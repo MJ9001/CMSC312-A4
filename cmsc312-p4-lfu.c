@@ -110,7 +110,7 @@ int replace_lfu( int *pid, frame_t **victim )
   }
   
   /* return info on victim */
-  //*victim = &physical_mem[iterator->ptentry->frame];
+  *victim = &physical_mem[iterator->ptentry->frame];
   *pid = toBeReplaced->pid;
   
   //list_entry->next = toBeReplaced->next;
@@ -138,6 +138,7 @@ int replace_lfu( int *pid, frame_t **victim )
 
 int update_lfu( int pid, frame_t *f )
 {
+  std::cout << "Do we get here.\n";
   /* make new list entry */
   lfu_entry_t *list_entry = ( lfu_entry_t *)malloc(sizeof(lfu_entry_t));
   list_entry->ptentry = &processes[pid].pagetable[f->page];
