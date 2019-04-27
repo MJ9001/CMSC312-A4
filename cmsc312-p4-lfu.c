@@ -64,26 +64,6 @@ typedef struct lfu{
 
 lfu_t *page_list;
 
-
-
-lfu_entry getSmallestEntry()
-{
-  int lowest_count = INT_MAX;
-  lfu_entry *first = page_list->first;
-  lfu_entry *toBeReplaced = first;
-  while(first != NULL)
-  {
-     if(first->ptentry.ct < lowest_count)
-     {
-       lowest_count = first->ptentry.ct;
-       toBeReplaced = first;
-     }
-     first = first->next;
-  }
-}
-
-
-
 /**********************************************************************
 
     Function    : init_lfu
@@ -115,9 +95,9 @@ int init_lfu( FILE *fp )
 
 int replace_lfu( int *pid, frame_t **victim )
 {
-  lfu_entry *first = page_list->first;
-  lfu_entry *iterator = page_list->first;
-  lfu_entry *toBeReplaced = first;
+  lfu_entry_t *first = page_list->first;
+  lfu_entry_t *iterator = page_list->first;
+  lfu_entry_t *toBeReplaced = first;
   while(iterator != NULL)
   {
      if(iterator->ptentry.ct < lowest_count)
@@ -158,7 +138,7 @@ int replace_lfu( int *pid, frame_t **victim )
 int update_lfu( int pid, frame_t *f )
 {
   /* make new list entry */
-  lfu_entry *list_entry = ( lfu_entry *)malloc(sizeof(lfu_entry));
+  lfu_entry_t *list_entry = ( lfu_entry_t *)malloc(sizeof(lfu_entry_t));
   list_entry->ptentry = &processes[pid].pagetable[f->table];
   list_entry->pid = pid;
   list_entry->next = NULL;
@@ -169,11 +149,11 @@ int update_lfu( int pid, frame_t *f )
   }
   /* or really at end */
   else {
-    lfu_entry *first = page_list->first;
-    lfu_entry *iterator = page_list->first;
+    lfu_entry_t *first = page_list->first;
+    lfu_entry_t *iterator = page_list->first;
     int counter = 0;
-    int lowest_count = INT_MAX;
-    lfu_entry *toBeReplaced = first;
+    int lowest_count = 2147483647;
+    lfu_entry_t *toBeReplaced = first;
   
     while(iterator != NULL)
     {
