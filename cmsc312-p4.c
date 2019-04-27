@@ -264,7 +264,7 @@ int page_replacement_init( FILE *fp, int mech )
   fseek( fp, 0, SEEK_SET );  /* reset at beginning */
   
   /* init replacement specific data */
-  pt_replace_init[mech]( fp );
+  pt_replace_init[mech](fp);
 
   return 0;
 }
@@ -495,7 +495,7 @@ int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op
     page = vaddr >> 12;
     ptentry = &current_pt[vaddr >> 12];
     if ( !ptentry )
-      __assert_fail("ptentry != ((void *)0)", "project1-demo.c", 0x1EFu, "pt_resolve_addr");
+      return -1;
     frame = ptentry->frame;
     *valid = ptentry->bits & 1;
     if ( *valid )

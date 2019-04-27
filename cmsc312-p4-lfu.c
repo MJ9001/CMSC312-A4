@@ -48,10 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmsc312-p4.h"
 
 /* Definitions */
-
 /* second chance list */
 
-/*typedef struct lfu_entry{  
+typedef struct lfu_entry{  
   int pid;
   ptentry_t *ptentry;
   struct lfu_entry *next;
@@ -60,23 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct lfu{
   lfu_entry_t *first;
+  int counted;
 } lfu_t;
 
-lfu_t *page_list;*/
-
-
-typedef struct fifo_entry {  
-  int pid;
-  frame_t *frame;
-  struct fifo_entry *next;
-} fifo_entry_t;
-
-typedef struct fifo {
-  fifo_entry_t *first;
-  fifo_entry_t *last;
-} fifo_t;
-
-fifo_t *frame_list;
+lfu_t *page_list;
 
 
 /**********************************************************************
@@ -90,8 +76,9 @@ fifo_t *frame_list;
 
 int init_lfu( FILE *fp )
 {
-  frame_list = (fifo_t *)malloc(sizeof(fifo_t));
-  
+  page_list = (lfu_t *)malloc(sizeof(lfu_t));
+  page_list->first = NULL;
+  page_list->counted = 0;
   return 0;
 }
 
@@ -109,11 +96,23 @@ int init_lfu( FILE *fp )
 
 int replace_lfu( int *pid, frame_t **victim )
 {
-  fifo_entry_t *first = frame_list->first;
-
+  lfu_entry *first = page_list->first;
+  
+  int lowest_count = INT_MAX;
+  lfu_entry *toBeReplaced = first;
+  while(first != NULL)
+  {
+     if(first->ptentry.ct < lowest_count)
+     {
+       lowest_count = first->ptentry.ct;
+       toBeReplaced = first;
+     }
+     first = first->next;
+  }
+  
   /* return info on victim */
-  *victim = first->frame;
-  *pid = first->pid;
+  *victim = toBeReplaced->frame;
+  *pid = toBeReplaced->pid;
 
   /* remove from list */
   frame_list->first = first->next;
@@ -138,7 +137,7 @@ int replace_lfu( int *pid, frame_t **victim )
 int update_lfu( int pid, frame_t *f )
 {
   /* make new list entry */
-  fifo_entry_t *list_entry = ( fifo_entry_t *)malloc(sizeof(fifo_entry_t));
+  lfu_entry *list_entry = ( lfu_entry *)malloc(sizeof(lfu_entry));
   list_entry->frame = f;
   list_entry->pid = pid;
   list_entry->next = NULL;
