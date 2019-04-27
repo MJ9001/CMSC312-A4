@@ -101,6 +101,10 @@ int replace_lfu( int *pid, frame_t **victim )
   lfu_entry_t *iterator = page_list->first;
   lfu_entry_t *toBeReplaced = first;
   int lowest_count = 2147483647;
+  if(first == NULL)
+  {
+    printf("FIRST WAS NULL, OMG.\n");
+  }
   while(iterator != NULL)
   {
      if(iterator->ptentry->ct < lowest_count)
@@ -183,8 +187,9 @@ int update_lfu( int pid, frame_t *f )
       iterator = first;
       while(iterator->next != NULL)
         iterator = iterator->next;
-      iterator->next = list_entry;
-      list_entry->prev = iterator;
+      iterator->next = NULL;
+      iterator->prev = list_entry;
+      list_entry->next = iterator;
     }
   }
   return 0;
