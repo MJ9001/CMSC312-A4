@@ -125,7 +125,10 @@ int replace_lfu( int *pid, frame_t **victim )
     *toBeReplaced->next->prev = *toBeReplaced->prev;
   if(toBeReplaced->prev != NULL)
     *toBeReplaced->prev->next = *toBeReplaced->next;
+  printf("Let's free up some space.\n");
   free(toBeReplaced);
+  
+  printf("And finished.\n");
   return 0;
 }
 
