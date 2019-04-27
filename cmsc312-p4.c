@@ -409,8 +409,21 @@ int tlb_flush( void )
 
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )
 {
+    unsigned int page;
+    int i;
 
-  /* Task #2 */
+    page = vaddr >> 12;
+    for ( i = 0; i <= 15; ++i )
+    {
+      if ( tlb[i].page == page )
+      {
+        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
+        hw_update_pageref(&current_pt[page], op);
+        ++current_pt[page].ct;
+        printf("tlb_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
+        return 1;
+      }
+    }
 
   return 0;  /* miss */
 }
