@@ -90,8 +90,8 @@ fifo_t *frame_list;
 
 int init_lfu( FILE *fp )
 {
-  page_list = (lfu_t *)malloc(sizeof(lfu_t));
-  page_list->first = NULL;
+  frame_list = (fifo_t *)malloc(sizeof(fifo_t));
+  
   return 0;
 }
 
