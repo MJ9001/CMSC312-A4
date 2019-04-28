@@ -176,7 +176,7 @@ int update_mfu( int pid, frame_t *f )
     while(iterator != NULL)
     {
        if(iterator->ptentry == list_entry->ptentry){
-           printf("Entry already on linked list")
+           printf("Entry already on linked list");
            return 0;
        }
        
