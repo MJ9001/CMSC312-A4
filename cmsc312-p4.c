@@ -579,7 +579,7 @@ int pt_invalidate_mapping( int pid, int page )//change
     else
       invalidates++;
     ptentry->frame = 0;
-    //ptentry->bits &= 0x38u;
+    ptentry->bits &= 0x38u;
     return 0;
 }
 
