@@ -161,13 +161,11 @@ int update_mfu( int pid, frame_t *f )
   list_entry->ptentry = &processes[pid].pagetable[f->page];
   list_entry->pid = pid;
   list_entry->next = NULL;
-  printf("And here.");
   
   /* put it at the end of the list (beginning if null) */
   if ( page_list->first == NULL ) {
     page_list->first = list_entry;
   }
-  printf("Then here.");
   /* or really at end */
   else {
     mfu_entry_t *first = page_list->first;
