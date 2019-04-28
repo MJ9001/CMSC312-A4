@@ -124,9 +124,10 @@ int replace_mfu( int *pid, frame_t **victim )
   
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
-  if(first == toBeReplaced)
-      page_list->first = first->next;
-  else{
+  if(first == toBeReplaced){
+    page_list->first = first->next;
+    page_list->first->prev = NULL;
+  } else {
     if(toBeReplaced->next != NULL)
        toBeReplaced->next->prev = toBeReplaced->prev;
     if(toBeReplaced->prev != NULL)
@@ -174,6 +175,11 @@ int update_mfu( int pid, frame_t *f )
   
     while(iterator != NULL)
     {
+       if(iterator->ptentry == list_entry->ptentry){
+           printf("Entry already on linked list")
+           return 0;
+       }
+       
        if(iterator->ptentry->ct > highest_count)
        {
          highest_count = iterator->ptentry->ct;
@@ -181,10 +187,6 @@ int update_mfu( int pid, frame_t *f )
        }
        iterator = iterator->next;
        counter++;
-       
-       
-       if(iterator->ptentry == list_entry->ptentry)
-           return 0;
     }
     if(counter >= PHYSICAL_FRAMES)
     {
