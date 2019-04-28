@@ -406,7 +406,7 @@ int tlb_flush( void )
    segments in the ELF binary (read-only, read-write, execute-only).  Assume that this is 
    already done */
 
-int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change1
+int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//
 {
     unsigned int page = vaddr >> SWAP_IN_OVERHEAD;
     for (int i = 0; i < TLB_ENTRIES; ++i )
@@ -479,7 +479,7 @@ int tlb_update_pageref( int frame, int page, int op )
 
 ***********************************************************************/
 
-int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//change1
+int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )
 {
 
     int page = vaddr >> SWAP_IN_OVERHEAD;
@@ -569,7 +569,7 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 ***********************************************************************/
 
-int pt_invalidate_mapping( int pid, int page )//change1
+int pt_invalidate_mapping( int pid, int page )
 {
     if ( processes[pid].pid != pid )
       return 0;
