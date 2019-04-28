@@ -408,9 +408,10 @@ int tlb_flush( void )
 
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change1
 {
+    unsigned int page = vaddr >> 12;
     for (int i = 0; i <= 15; ++i )
     {
-      if ( tlb[i].page == vaddr >> 12 )
+      if ( tlb[i].page == page )
       {
         *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
         hw_update_pageref(&current_pt[page], op);
