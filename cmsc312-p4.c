@@ -408,12 +408,12 @@ int tlb_flush( void )
 
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change1
 {
-    unsigned int page = vaddr >> 12;
-    for (int i = 0; i <= 15; ++i )
+    unsigned int page = vaddr >> SWAP_IN_OVERHEAD;
+    for (int i = 0; i < TLB_ENTRIES; ++i )
     {
       if ( tlb[i].page == page )
       {
-        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
+        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << SWAP_OUT_OVERHEAD);
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
         printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
@@ -482,15 +482,15 @@ int tlb_update_pageref( int frame, int page, int op )
 int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//change1
 {
 
-    int page = vaddr >> 12;
-    ptentry_t *ptentry = &current_pt[vaddr >> 12];
+    int page = vaddr >> SWAP_IN_OVERHEAD;
+    ptentry_t *ptentry = &current_pt[vaddr >> SWAP_IN_OVERHEAD];
     if ( !ptentry )
       return -1;
     int frame = ptentry->frame;
-    *valid = ptentry->bits & 1;
+    *valid = ptentry->bits & VALIDBIT;
     if ( *valid )
     {
-      *paddr = (vaddr & 0xFFF) + (frame << 12);
+      *paddr = (vaddr & 0xFFF) + (frame << SWAP_OUT_OVERHEAD);
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
       current_pt[page].ct++;
@@ -569,17 +569,16 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 ***********************************************************************/
 
-int pt_invalidate_mapping( int pid, int page )//change
+int pt_invalidate_mapping( int pid, int page )//change1
 {
     if ( processes[pid].pid != pid )
       return 0;
     ptentry_t *ptentry = &processes[pid].pagetable[page];
-    if ( ptentry->bits & 4 )
+    if ( ptentry->bits & DIRTYBIT )
       pt_write_frame(&physical_mem[ptentry->frame]);
     else
       invalidates++;
     ptentry->frame = 0;
-    ptentry->bits &= 0x38u;
     return 0;
 }
 

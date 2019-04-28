@@ -58,7 +58,6 @@ typedef struct second_entry {
   ptentry_t *ptentry;
   struct second_entry *next;
   struct second_entry *prev;
-  int second_chance;
 } second_entry_t;
 
 typedef struct second {
@@ -74,7 +73,7 @@ int do_secondchance()
   
     while(iterator != NULL)
     {
-        iterator->second_chance = 0;
+        iterator->ptentry->bits &= ~REFBIT;
         iterator = iterator->next;
     }
 }
@@ -109,7 +108,6 @@ int init_second( FILE *fp )
 
 int replace_second( int *pid, frame_t **victim )
 {
-  printf("And then we got here.\n");
   second_entry_t *first = page_list->first;
   second_entry_t *iterator = page_list->first;
   second_entry_t *toBeReplaced = first;
@@ -119,7 +117,7 @@ int replace_second( int *pid, frame_t **victim )
   }
   while(iterator != NULL)
   {
-     if(iterator->second_chance == 0 && toBeReplaced == NULL)
+     if((iterator->ptentry->bits & REFBIT) > 0 && toBeReplaced == NULL)
      {
        toBeReplaced = iterator;
      }
@@ -131,11 +129,7 @@ int replace_second( int *pid, frame_t **victim )
   /* return info on victim */
   *victim = &physical_mem[toBeReplaced->ptentry->frame];
   *pid = toBeReplaced->pid;
-  printf("Return info set.\n");
   
-  //list_entry->next = toBeReplaced->next;
-  //list_entry->prev = toBeReplaced->prev;
-  if(first == toBeReplaced){
     page_list->first = first->next;
     if(page_list->first != NULL)
       page_list->first->prev = NULL;
@@ -144,11 +138,9 @@ int replace_second( int *pid, frame_t **victim )
        toBeReplaced->next->prev = toBeReplaced->prev;
     if(toBeReplaced->prev != NULL)
        toBeReplaced->prev->next = toBeReplaced->next;
-    printf("Let's free up some space.\n");
     free(toBeReplaced);
   }
   do_secondchance();
-  printf("And finished.\n");
   return 0;
 }
 
@@ -186,10 +178,10 @@ int update_second( int pid, frame_t *f )
     while(iterator != NULL)
     {
        if(iterator->ptentry == list_entry->ptentry) {
-           iterator->second_chance = 1;
+           iterator->ptentry->bits |= REFBIT;
            return 0;
        }
-       if(iterator->second_chance == 0 && toBeReplaced == NULL)
+       if((iterator->ptentry->bits & REFBIT) > 0 && toBeReplaced == NULL)
        {
          toBeReplaced = iterator;
        }
