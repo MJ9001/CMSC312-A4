@@ -76,6 +76,7 @@ int do_secondchance()
         iterator->ptentry->bits &= ~REFBIT;
         iterator = iterator->next;
     }
+    return 0;
 }
 
 
