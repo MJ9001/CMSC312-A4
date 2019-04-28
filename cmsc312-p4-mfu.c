@@ -126,7 +126,8 @@ int replace_mfu( int *pid, frame_t **victim )
   //list_entry->prev = toBeReplaced->prev;
   if(first == toBeReplaced){
     page_list->first = first->next;
-    page_list->first->prev = NULL;
+    if(page_list->first != NULL)
+      page_list->first->prev = NULL;
   } else {
     if(toBeReplaced->next != NULL)
        toBeReplaced->next->prev = toBeReplaced->prev;
