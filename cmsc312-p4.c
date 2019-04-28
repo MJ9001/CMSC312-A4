@@ -406,20 +406,16 @@ int tlb_flush( void )
    segments in the ELF binary (read-only, read-write, execute-only).  Assume that this is 
    already done */
 
-int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change
+int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//change1
 {
-    unsigned int page;
-    int i;
-
-    page = vaddr >> 12;
-    for ( i = 0; i <= 15; ++i )
+    for (int i = 0; i <= 15; ++i )
     {
-      if ( tlb[i].page == page )
+      if ( tlb[i].page == vaddr >> 12 )
       {
         *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
-        printf("tlb_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
+        printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
         return 1;
       }
     }
@@ -482,27 +478,23 @@ int tlb_update_pageref( int frame, int page, int op )
 
 ***********************************************************************/
 
-int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//change
+int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//change1
 {
 
-    int opa;
-    int page;
-    ptentry_t *ptentry;
-    int frame;
-    page = vaddr >> 12;
-    ptentry = &current_pt[vaddr >> 12];
+    int page = vaddr >> 12;
+    ptentry_t *ptentry = &current_pt[vaddr >> 12];
     if ( !ptentry )
       return -1;
-    frame = ptentry->frame;
+    int frame = ptentry->frame;
     *valid = ptentry->bits & 1;
     if ( *valid )
     {
       *paddr = (vaddr & 0xFFF) + (frame << 12);
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
-      ++current_pt[page].ct;
-      printf("pt_resolve_addr: hit -- vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
-      ++memory_accesses;
+      current_pt[page].ct++;
+      printf("=== pt_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
+      memory_accesses++;
     }
   return 0;
 }
@@ -578,17 +570,15 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 int pt_invalidate_mapping( int pid, int page )//change
 {
-    ptentry_t *ptentry; // [rsp+18h] [rbp-8h]
-
     if ( processes[pid].pid != pid )
-      __assert_fail("processes[pid].pid == pid", "project1-demo.c", 0x24Fu, "pt_invalidate_mapping");
-    ptentry = &processes[pid].pagetable[page];
+      return 0;
+    ptentry_t *ptentry = &processes[pid].pagetable[page];
     if ( ptentry->bits & 4 )
       pt_write_frame(&physical_mem[ptentry->frame]);
     else
-      ++invalidates;
+      invalidates++;
     ptentry->frame = 0;
-    ptentry->bits &= 0x38u;
+    //ptentry->bits &= 0x38u;
     return 0;
 }
 

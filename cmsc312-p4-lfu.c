@@ -160,26 +160,21 @@ int update_lfu( int pid, frame_t *f )
   list_entry->ptentry = &processes[pid].pagetable[f->page];
   list_entry->pid = pid;
   list_entry->next = NULL;
-  printf("1\n");
   
   /* put it at the end of the list (beginning if null) */
   if ( page_list->first == NULL ) {
     page_list->first = list_entry;
-    printf("2.1\n");
   }
   /* or really at end */
   else {
-    printf("2.2\n");
     lfu_entry_t *first = page_list->first;
     lfu_entry_t *iterator = page_list->first;
     int counter = 0;
     int lowest_count = 2147483647;
     lfu_entry_t *toBeReplaced = first;
-    printf("3\n");
   
     while(iterator != NULL)
     {
-       printf("LOOPING!!\n");
        if(iterator->ptentry == list_entry->ptentry)
            return 0;
        if(iterator->ptentry->ct < lowest_count)
