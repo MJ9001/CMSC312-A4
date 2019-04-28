@@ -125,7 +125,8 @@ int replace_mfu( int *pid, frame_t **victim )
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
   if(first == toBeReplaced)
-      page_list->first = first->next;
+    page_list->first = first->next;
+    page_list->first->prev = NULL;
   else{
     if(toBeReplaced->next != NULL)
        toBeReplaced->next->prev = toBeReplaced->prev;
@@ -174,6 +175,9 @@ int update_mfu( int pid, frame_t *f )
   
     while(iterator != NULL)
     {
+       if(iterator->ptentry == list_entry->ptentry)
+           return 0;
+       
        if(iterator->ptentry->ct > highest_count)
        {
          highest_count = iterator->ptentry->ct;
@@ -182,7 +186,7 @@ int update_mfu( int pid, frame_t *f )
        iterator = iterator->next;
        counter++;
     }
-    if(counter >= 4)
+    if(counter >= PHYSICAL_FRAMES)
     {
       list_entry->next = toBeReplaced->next;
       list_entry->prev = toBeReplaced->prev;

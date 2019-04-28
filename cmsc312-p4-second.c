@@ -58,6 +58,7 @@ typedef struct second_entry {
   ptentry_t *ptentry;
   struct second_entry *next;
   struct second_entry *prev;
+  int second_chance;
 } second_entry_t;
 
 typedef struct second {
@@ -65,6 +66,19 @@ typedef struct second {
 } second_t;
 
 second_t *page_list;
+
+
+int do_secondchance()
+{
+    second_entry_t *iterator = page_list->first;
+  
+    while(iterator != NULL)
+    {
+        iterator->second_chance = 0;
+        iterator = iterator->next;
+    }
+}
+
 
 /**********************************************************************
 
@@ -95,8 +109,46 @@ int init_second( FILE *fp )
 
 int replace_second( int *pid, frame_t **victim )
 {
-  /* Task #3 */
-
+  printf("And then we got here.\n");
+  second_entry_t *first = page_list->first;
+  second_entry_t *iterator = page_list->first;
+  second_entry_t *toBeReplaced = first;
+  if(first == NULL)
+  {
+    printf("Empty list error.\n");
+  }
+  while(iterator != NULL)
+  {
+     if(iterator->second_chance == 0 && toBeReplaced == NULL)
+     {
+       toBeReplaced = iterator;
+     }
+     iterator = iterator->next;
+     counter++;
+  }
+  if(toBeReplaced == NULL)//use FIFO if all items are in second chance.
+    toBeReplaced = page_list->first;
+  
+  /* return info on victim */
+  *victim = &physical_mem[toBeReplaced->ptentry->frame];
+  *pid = toBeReplaced->pid;
+  printf("Return info set.\n");
+  
+  //list_entry->next = toBeReplaced->next;
+  //list_entry->prev = toBeReplaced->prev;
+  if(first == toBeReplaced)
+    page_list->first = first->next;
+    page_list->first->prev = NULL;
+  else{
+    if(toBeReplaced->next != NULL)
+       toBeReplaced->next->prev = toBeReplaced->prev;
+    if(toBeReplaced->prev != NULL)
+       toBeReplaced->prev->next = toBeReplaced->next;
+    printf("Let's free up some space.\n");
+    free(toBeReplaced);
+  }
+  do_secondchance();
+  printf("And finished.\n");
   return 0;
 }
 
@@ -113,9 +165,62 @@ int replace_second( int *pid, frame_t **victim )
 
 int update_second( int pid, frame_t *f )
 {
-  /* Task #3 */
-
-  return 0;  
+  printf("Do we get here.\n");
+  /* make new list entry */
+  second_entry_t *list_entry = ( second_entry_t *)malloc(sizeof(second_entry_t));
+  list_entry->ptentry = &processes[pid].pagetable[f->page];
+  list_entry->pid = pid;
+  list_entry->next = NULL;
+  
+  /* put it at the end of the list (beginning if null) */
+  if ( page_list->first == NULL ) {
+    page_list->first = list_entry;
+  }
+  /* or really at end */
+  else {
+    second_entry_t *first = page_list->first;
+    second_entry_t *iterator = page_list->first;
+    int counter = 0;
+    second_entry_t *toBeReplaced = NULL;
+  
+    while(iterator != NULL)
+    {
+       if(iterator->ptentry == list_entry->ptentry) {
+           iterator->second_chance = 1;
+           return 0;
+       }
+       if(iterator->second_chance == 0 && toBeReplaced == NULL)
+       {
+         toBeReplaced = iterator;
+       }
+       iterator = iterator->next;
+       counter++;
+    }
+    if(toBeReplaced == NULL)
+        toBeReplaced = page_list->first;
+    if(counter >= PHYSICAL_FRAMES)
+    {
+      list_entry->next = toBeReplaced->next;
+      list_entry->prev = toBeReplaced->prev;
+      if(page_list->first == toBeReplaced)
+         page_list->first = list_entry;
+      if(toBeReplaced->next != NULL)
+         toBeReplaced->next->prev = list_entry;
+      if(toBeReplaced->prev != NULL)
+         toBeReplaced->prev->next = list_entry;
+      free(toBeReplaced);
+    }else
+    {
+      iterator = first;
+      while(iterator->next != NULL)
+        iterator = iterator->next;
+      iterator->next = NULL;
+      iterator->prev = list_entry;
+      list_entry->next = iterator;
+      do_secondchance();
+    }
+  }
+  return 0;
 }
 
 
