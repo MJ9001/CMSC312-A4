@@ -181,8 +181,12 @@ int update_mfu( int pid, frame_t *f )
        }
        iterator = iterator->next;
        counter++;
+       
+       
+       if(iterator->ptentry == list_entry->ptentry)
+           return 0;
     }
-    if(counter >= 4)
+    if(counter >= PHYSICAL_FRAMES)
     {
       list_entry->next = toBeReplaced->next;
       list_entry->prev = toBeReplaced->prev;
