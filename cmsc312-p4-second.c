@@ -131,9 +131,9 @@ int replace_second( int *pid, frame_t **victim )
   *pid = toBeReplaced->pid;
   
     page_list->first = first->next;
-    if(page_list->first != NULL)
+    if(page_list->first != NULL){
       page_list->first->prev = NULL;
-  }else{
+    }else{
     if(toBeReplaced->next != NULL)
        toBeReplaced->next->prev = toBeReplaced->prev;
     if(toBeReplaced->prev != NULL)
