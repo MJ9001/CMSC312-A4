@@ -124,7 +124,6 @@ int replace_second( int *pid, frame_t **victim )
        toBeReplaced = iterator;
      }
      iterator = iterator->next;
-     counter++;
   }
   if(toBeReplaced == NULL)//use FIFO if all items are in second chance.
     toBeReplaced = page_list->first;
@@ -136,10 +135,10 @@ int replace_second( int *pid, frame_t **victim )
   
   //list_entry->next = toBeReplaced->next;
   //list_entry->prev = toBeReplaced->prev;
-  if(first == toBeReplaced)
+  if(first == toBeReplaced){
     page_list->first = first->next;
     page_list->first->prev = NULL;
-  else{
+  }else{
     if(toBeReplaced->next != NULL)
        toBeReplaced->next->prev = toBeReplaced->prev;
     if(toBeReplaced->prev != NULL)
