@@ -179,6 +179,9 @@ int update_lfu( int pid, frame_t *f )
   
     while(iterator != NULL)
     {
+       printf("LOOPING!!\n");
+       if(iterator->ptentry == list_entry->ptentry)
+           return 0;
        if(iterator->ptentry->ct < lowest_count)
        {
          lowest_count = iterator->ptentry->ct;
@@ -186,9 +189,6 @@ int update_lfu( int pid, frame_t *f )
        }
        iterator = iterator->next;
        counter++;
-       
-       if(iterator->ptentry == list_entry->ptentry)
-           return 0;
     }
     if(counter >= PHYSICAL_FRAMES)
     {
