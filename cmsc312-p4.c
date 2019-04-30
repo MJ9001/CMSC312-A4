@@ -571,7 +571,7 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 int pt_invalidate_mapping( int pid, int page )
 {
-    if ( [pid].pid != pid )//check if process storage for pid is correct
+    if (processes[pid].pid != pid )//check if process storage for pid is correct
       return -1;//else return error
     ptentry_t *ptentry = &processes[pid].pagetable[page];//grab ptentry from process list
     if ( ptentry->bits & DIRTYBIT )//check if ptentry has been modified
