@@ -413,7 +413,7 @@ int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//
     {
       if ( tlb[i].page == page )
       {
-        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 14);
+        *paddr = (vaddr & 0x3FFF) + (tlb[i].frame << 14);
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
         printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
@@ -479,7 +479,7 @@ int tlb_update_pageref( int frame, int page, int op )
 
 ***********************************************************************/
 
-int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )
+int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//task
 {
 
     int page = vaddr >> 14;
@@ -490,7 +490,7 @@ int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op
     *valid = ptentry->bits & VALIDBIT;
     if ( *valid )
     {
-      *paddr = (vaddr & 0xFFF) + (frame << 14);
+      *paddr = (vaddr & 0x3FFF) + (frame << 14);
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
       current_pt[page].ct++;
@@ -569,7 +569,7 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 ***********************************************************************/
 
-int pt_invalidate_mapping( int pid, int page )
+int pt_invalidate_mapping( int pid, int page )//task
 {
     if (processes[pid].pid != pid )//check if process storage for pid is correct
       return -1;//else return error
@@ -613,7 +613,7 @@ int pt_write_frame( frame_t *f )
 
 ***********************************************************************/
 
-int pt_alloc_frame( int pid, frame_t *f, ptentry_t *ptentry, int op, int mech )
+int pt_alloc_frame( int pid, frame_t *f, ptentry_t *ptentry, int op, int mech )//task
 {
   f->allocated = 1;//set frame allocated
   f->page = ptentry->number;//set page number of frame
