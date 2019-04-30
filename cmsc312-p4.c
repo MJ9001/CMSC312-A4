@@ -406,14 +406,14 @@ int tlb_flush( void )
    segments in the ELF binary (read-only, read-write, execute-only).  Assume that this is 
    already done */
 
-int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//
+int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//task2
 {
-    unsigned int page = vaddr >> 12;
+    unsigned int page = vaddr / PAGE_SIZE;
     for (int i = 0; i < TLB_ENTRIES; ++i )
     {
       if ( tlb[i].page == page )
       {
-        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 12);
+        *paddr = (vaddr % PAGE_SIZE) + (tlb[i].frame * PAGE_SIZE);
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
         printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
@@ -479,18 +479,18 @@ int tlb_update_pageref( int frame, int page, int op )
 
 ***********************************************************************/
 
-int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//task
+int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//task3
 {
 
-    int page = vaddr >> 12;
-    ptentry_t *ptentry = &current_pt[vaddr >> 12];
+    int page = vaddr / PAGE_SIZE;
+    ptentry_t *ptentry = &current_pt[vaddr / PAGE_SIZE];
     if ( !ptentry )
       return -1;
     int frame = ptentry->frame;
     *valid = ptentry->bits & VALIDBIT;
     if ( *valid )
     {
-      *paddr = (vaddr & 0xFFF) + (frame << 12);
+      *paddr = (vaddr % PAGE_SIZE) + (frame << 12);
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
       current_pt[page].ct++;
