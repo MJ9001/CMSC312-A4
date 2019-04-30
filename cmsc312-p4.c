@@ -409,7 +409,8 @@ int tlb_flush( void )
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//task2
 {
     unsigned int page = vaddr / PAGE_SIZE;//get page from virtual address
-    for (int i = 0; i < TLB_ENTRIES; ++i )//Loop through table entries
+    int i;
+    for (i = 0; i < TLB_ENTRIES; ++i )//Loop through table entries
     {
       if ( tlb[i].page == page )//table entry found from page
       {
