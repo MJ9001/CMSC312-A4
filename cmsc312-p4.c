@@ -408,12 +408,15 @@ int tlb_flush( void )
 
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//task2
 {
-    unsigned int page = vaddr / PAGE_SIZE;
-    for (int i = 0; i < TLB_ENTRIES; ++i )
+    unsigned int page = vaddr / PAGE_SIZE;//get page from virtual address
+    for (int i = 0; i < TLB_ENTRIES; ++i )//Loop through table entries
     {
-      if ( tlb[i].page == page )
+      if ( tlb[i].page == page )//table entry found from page
       {
+        /* compute pyhsical address */
         *paddr = (vaddr % PAGE_SIZE) + (tlb[i].frame * PAGE_SIZE);
+        
+        /* do hardware update to page */
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
         printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
@@ -482,20 +485,23 @@ int tlb_update_pageref( int frame, int page, int op )
 int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )//task3
 {
 
-    int page = vaddr / PAGE_SIZE;
-    ptentry_t *ptentry = &current_pt[vaddr / PAGE_SIZE];
-    if ( !ptentry )
-      return -1;
-    int frame = ptentry->frame;
-    *valid = ptentry->bits & VALIDBIT;
+    int page = vaddr / PAGE_SIZE;//get page
+    ptentry_t *ptentry = &current_pt[page];//get ptentry
+    if ( !ptentry )//check if ptentry exists
+      return -1;//if not return with error
+    int frame = ptentry->frame;//get frame
+    *valid = ptentry->bits & VALIDBIT;//check if ptentry is valid
     if ( *valid )
     {
-      *paddr = (vaddr % PAGE_SIZE) + (frame << 12);
+      /* compute new physical addr */
+      *paddr = (vaddr % PAGE_SIZE) + (frame * PAGE_SIZE);
+      
+      /* do hardware update to page */
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
-      current_pt[page].ct++;
+      current_pt[page].ct++;//increase count 
       printf("=== pt_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
-      memory_accesses++;
+      memory_accesses++;//Increase memory access times
     }
   return 0;
 }
@@ -558,7 +564,6 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
   return 0;
 }
-
 /**********************************************************************
 
     Function    : pt_invalidate_mapping
