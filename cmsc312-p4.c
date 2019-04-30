@@ -408,12 +408,12 @@ int tlb_flush( void )
 
 int tlb_resolve_addr( unsigned int vaddr, unsigned int *paddr, int op )//
 {
-    unsigned int page = vaddr >> SWAP_IN_OVERHEAD;
+    unsigned int page = vaddr >> 14;
     for (int i = 0; i < TLB_ENTRIES; ++i )
     {
       if ( tlb[i].page == page )
       {
-        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << SWAP_OUT_OVERHEAD);
+        *paddr = (vaddr & 0xFFF) + (tlb[i].frame << 14);
         hw_update_pageref(&current_pt[page], op);
         current_pt[page].ct++;
         printf("=== tlb_resolve_addr: vaddr: 0x%x; paddr: 0x%x\n", vaddr, *paddr);
@@ -482,15 +482,15 @@ int tlb_update_pageref( int frame, int page, int op )
 int pt_resolve_addr( unsigned int vaddr, unsigned int *paddr, int *valid, int op )
 {
 
-    int page = vaddr >> SWAP_IN_OVERHEAD;
-    ptentry_t *ptentry = &current_pt[vaddr >> SWAP_IN_OVERHEAD];
+    int page = vaddr >> 14;
+    ptentry_t *ptentry = &current_pt[vaddr >> 14];
     if ( !ptentry )
       return -1;
     int frame = ptentry->frame;
     *valid = ptentry->bits & VALIDBIT;
     if ( *valid )
     {
-      *paddr = (vaddr & 0xFFF) + (frame << SWAP_OUT_OVERHEAD);
+      *paddr = (vaddr & 0xFFF) + (frame << 14);
       hw_update_pageref(&current_pt[page], op);
       tlb_update_pageref(frame, page, op);
       current_pt[page].ct++;
@@ -571,14 +571,14 @@ int pt_demand_page( int pid, unsigned int vaddr, unsigned int *paddr, int op, in
 
 int pt_invalidate_mapping( int pid, int page )
 {
-    if ( processes[pid].pid != pid )
-      return 0;
-    ptentry_t *ptentry = &processes[pid].pagetable[page];
-    if ( ptentry->bits & DIRTYBIT )
-      pt_write_frame(&physical_mem[ptentry->frame]);
+    if ( [pid].pid != pid )//check if process storage for pid is correct
+      return -1;//else return error
+    ptentry_t *ptentry = &processes[pid].pagetable[page];//grab ptentry from process list
+    if ( ptentry->bits & DIRTYBIT )//check if ptentry has been modified
+      pt_write_frame(&physical_mem[ptentry->frame]);//if so, write frame to swap
     else
-      invalidates++;
-    ptentry->frame = 0;
+      invalidates++;//if not increase pagefaults
+    ptentry->frame = 0;//remove frame
     return 0;
 }
 
@@ -615,12 +615,12 @@ int pt_write_frame( frame_t *f )
 
 int pt_alloc_frame( int pid, frame_t *f, ptentry_t *ptentry, int op, int mech )
 {
-  f->allocated = 1;
-  f->page = ptentry->number;
-  f->op = op;
-  ptentry->frame = f->number;
-  ptentry->bits |= 1u;
-  ptentry->op = op;
+  f->allocated = 1;//set frame allocated
+  f->page = ptentry->number;//set page number of frame
+  f->op = op;//Set if read or write frame
+  ptentry->frame = f->number;//set frame number of ptentry
+  ptentry->bits |= VALIDBIT;//set entry to valid
+  ptentry->op = op;//set if read or write ptentry
   pt_update_replacement[mech]( pid, f );
 
   return 0;
